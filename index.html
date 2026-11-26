@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turkey Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: loud, playful family-game-night sportsbook; quick to use with a plate in one hand.
+   IDEA: a casino odds board / betting slip, felt green, for the dinner table.
+   PICTURE: the live board of props with big tappable odds buttons is the page.
+   COLOUR and TYPE: felt green field, white cards, pumpkin-orange action accent; Barlow Condensed odds + Barlow body.
+   LAYOUT: felt header with your name and bankroll, three tabs, one column of prop cards, bet slip slides up from the bottom. */
+:root{color-scheme:light dark;
+--bg:light-dark(#eef1ec,#08120e);--ink:light-dark(#10201a,#e8f1ec);--mut:light-dark(#53655c,#9db3a8);
+--card:light-dark(#fff,#11201a);--line:light-dark(#d9e0d9,#22362d);--felt:light-dark(#0f4a37,#0c3a2b);
+--acc:light-dark(#e65f12,#ff8a3d);--accink:#fff;--win:light-dark(#11804c,#3fcf8a);--loss:light-dark(#b8332a,#ff7468);
+--chip:light-dark(#f1f4f0,#18291f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip;padding-bottom:120px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.top{background:var(--felt);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 2px,transparent 2px 9px);color:#fff;padding:22px max(4vw,16px) 0}
+.wrap{max-width:760px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:46px;height:46px;flex:none}
+h1{font:700 clamp(34px,7vw,48px)/1.02 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em}
+.sub{margin:2px 0 0;color:#cfe5da;font-size:15px}
+.me{margin-top:16px;width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 14px;color:#fff;min-height:56px;text-align:left}
+.me small{display:block;color:#bcd8ca;font-size:13px}
+.me b{font:700 22px/1.1 "Barlow Condensed",sans-serif}
+.me .bank{text-align:right;white-space:nowrap}
+.tabs{display:flex;gap:4px;margin-top:14px}
+.tabs button{flex:1;background:none;border:0;color:#cfe5da;padding:12px 6px 14px;font-weight:600;border-bottom:4px solid transparent;min-height:48px}
+.tabs button[aria-selected=true]{color:#fff;border-color:var(--acc)}
+main{padding:16px max(4vw,16px)}
+.note{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px;color:var(--mut)}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.cats{display:flex;gap:6px;overflow-x:auto;flex:1;padding-bottom:2px}
+.cats button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-size:14px;font-weight:600;min-height:40px}
+.cats button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{border:0;background:var(--acc);color:var(--accink);font-weight:600;border-radius:12px;padding:10px 16px;min-height:44px}
+.btn.ghost{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{min-height:38px;padding:6px 12px;font-size:14px}
+.btn.warn{background:var(--loss);color:#fff}
+.prop{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.prop.done{opacity:.92}
+.ph{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mut);font-weight:600}
+.pill{background:var(--chip);border-radius:99px;padding:2px 10px}
+.st-locked{color:var(--acc)}.st-final{color:var(--win)}
+.prop h3{font:700 22px/1.15 "Barlow Condensed",sans-serif;margin:6px 0 12px;text-wrap:balance}
+.sides{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.odd{display:flex;justify-content:space-between;align-items:center;gap:8px;border:2px solid var(--line);background:var(--chip);border-radius:12px;padding:10px 12px;min-height:54px;text-align:left}
+.odd .sl{font-weight:600;font-size:15px;line-height:1.2}
+.odd b{font:700 22px/1 "Barlow Condensed",sans-serif;white-space:nowrap}
+.odd:not(:disabled):hover{border-color:var(--acc)}
+.odd.sel{border-color:var(--acc);background:var(--acc);color:var(--accink)}
+.odd:disabled{cursor:default}
+.odd.won{border-color:var(--win);color:var(--win)}
+.odd.lost{opacity:.5;text-decoration:line-through}
+.pm{font-size:13px;color:var(--mut);margin-top:10px}
+.bk{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.bk .lbl{width:100%;font-size:13px;color:var(--mut);font-weight:600}
+h2{font:700 26px/1.1 "Barlow Condensed",sans-serif;margin:8px 0 12px}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.row .t{font-weight:600;line-height:1.25}
+.row .m{font-size:13px;color:var(--mut)}
+.row .r{text-align:right;white-space:nowrap;font-weight:600}
+.pos{color:var(--win)}.neg{color:var(--loss)}
+.rank{font:700 26px/1 "Barlow Condensed",sans-serif;width:34px;flex:none;color:var(--mut)}
+.meter{height:6px;background:var(--chip);border-radius:99px;margin-top:6px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.empty{text-align:center;color:var(--mut);padding:32px 12px;background:var(--card);border:1px dashed var(--line);border-radius:16px}
+.empty p{margin:0 0 12px}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.2);padding:16px max(4vw,16px) calc(16px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;z-index:5;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.sheet .wrap>div{margin-bottom:10px}
+.sh-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.sh-top b{font:700 22px/1.15 "Barlow Condensed",sans-serif;display:block}
+.x{border:0;background:var(--chip);border-radius:99px;width:40px;height:40px;flex:none;font-size:20px;line-height:1}
+.stake{display:flex;gap:6px;flex-wrap:wrap}
+.stake input{flex:1 1 120px;font-size:20px;font-weight:600;padding:8px 12px;border:2px solid var(--line);border-radius:12px;background:var(--bg);min-height:48px}
+.stake button{flex:none}
+.pays{display:flex;justify-content:space-between;font-size:15px;color:var(--mut)}
+.pays b{color:var(--ink);font-size:18px}
+.place{width:100%;font-size:18px;min-height:52px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9;display:flex;align-items:flex-end;justify-content:center}
+.mbox{background:var(--card);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+@media(min-width:620px){.modal{align-items:center}.mbox{border-radius:20px}}
+label{display:block;font-size:14px;font-weight:600;color:var(--mut);margin:10px 0 4px}
+.in{width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:44px}
+.siderow{display:grid;grid-template-columns:minmax(0,1fr) 96px 40px;gap:6px;margin-bottom:6px}
+.plist button.pl{width:100%;display:flex;justify-content:space-between;border:1px solid var(--line);background:var(--chip);border-radius:12px;padding:12px 14px;margin-bottom:6px;min-height:48px;font-weight:600}
+.plist button.pl.on{border-color:var(--acc);border-width:2px}
+.addp{display:flex;gap:6px;margin-top:10px}
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:600;z-index:20;font-size:15px;max-width:90vw}
+.small{font-size:13px;color:var(--mut)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#e65f12"/><circle cx="24" cy="24" r="17" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="4 4"/><path d="M15 30c0-6 4-12 10-12 4 0 7 3 7 6 0 2-1 3-3 3h-6c-3 0-4 1-4 3z" fill="#fff"/><circle cx="32" cy="19" r="2.6" fill="#fff"/><circle cx="34.5" cy="16.5" r="2.2" fill="#fff"/></svg>
+    <div><h1>Turkey Book</h1><p class="sub">Thanksgiving 2026 · Every bettor starts with 1,000 Turkey Bucks</p></div>
+  </div>
+  <button class="me" id="meBtn" data-act="pick"><span><small>Betting as</small><b id="meName">Pick your name</b></span><span class="bank"><small>Bankroll</small><b id="meBank">—</b></span></button>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-v="board" aria-selected="true">Board</button>
+    <button role="tab" data-v="bets" aria-selected="false">My bets</button>
+    <button role="tab" data-v="stand" aria-selected="false">Standings</button>
+  </nav>
+</div></header>
+<main><div class="wrap">
+  <div class="note" id="note">Opening the book…</div>
+  <section id="v-board">
+    <div class="bar"><div class="cats" id="cats"></div><button class="btn sm" data-act="newprop" id="addBtn" hidden>+ Add prop</button></div>
+    <div id="props"></div>
+  </section>
+  <section id="v-bets" hidden><div id="mybets"></div></section>
+  <section id="v-stand" hidden><div id="stand"></div></section>
+  <p style="text-align:center;margin-top:28px"><button class="btn ghost sm" data-act="host" id="hostBtn">Host controls</button> <button class="btn ghost sm" data-act="reset" id="resetBtn" hidden>Reset board to bingo props</button></p>
+</div></main>
+<div class="sheet" id="slip" hidden></div>
+<div class="modal" id="modal" hidden><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+{
+// ===== SETUP: paste your Firebase web config here (Project settings > Your apps > Web app) =====
+const FIREBASE={apiKey:'',authDomain:'',projectId:'',appId:''};
+// PIN that unlocks host controls (add, lock, settle props). Change it before you share the link.
+const HOST_PIN='1126';
+// ==========================================================================================
+const HK='turkeybook.host';
+const START=1000,LS='turkeybook.v1',MEK='turkeybook.me',COLS=['players','props','bets'];
+const STARTER=[
+ ['Arrivals','Maddie has her shoes off when we walk in',[['Yes',150],['No',-180]]],
+ ['Arrivals','Still cooking when we arrive',[['Yes',-250],['No',200]]],
+ ['Arrivals','Drunk Ziggy sighting',[['Yes',120],['No',-140]]],
+ ['Arrivals','Andrew gets drunk',[['Yes',-130],['No',110]]],
+ ['Arrivals','Tammy’s wig is messed up',[['Yes',-120],['No',100]]],
+ ['Stories','Italy apartment comes up',[['Yes',-150],['No',125]]],
+ ['Stories','Aunt Jerry tells a cooking story',[['Yes',-200],['No',165]]],
+ ['Stories','The Target story gets told',[['Yes',110],['No',-130]]],
+ ['Stories','Random travel trips come up',[['Yes',-300],['No',240]]],
+ ['Stories','The Florida “fiasco” comes up',[['Yes',120],['No',-140]]],
+ ['Stories','Maine comes up',[['Yes',130],['No',-150]]],
+ ['Stories','Phil and Marti’s house comes up',[['Yes',140],['No',-160]]],
+ ['Stories','Brian and Cheryl come up',[['Yes',150],['No',-180]]],
+ ['Family news','Someone gets wedding questions',[['Yes',-350],['No',275]]],
+ ['Family news','“Mikey and G wedding?” gets asked',[['Yes',-160],['No',135]]],
+ ['Family news','Catherine baby talk',[['Yes',-180],['No',150]]],
+ ['Family news','Christmas Eve plans come up',[['Yes',-250],['No',200]]],
+ ['Family news','Angie makes her Christmas Eve offer',[['Yes',160],['No',-190]]],
+ ['Sightings','Michael sighting',[['Yes',100],['No',-120]]],
+ ['Sightings','Matthew GG sighting',[['Yes',180],['No',-220]]],
+ ['Sightings','Someone gets called an NPC',[['Yes',-110],['No',-110]]],
+ ['Sightings','Someone FaceTimes in',[['Yes',-220],['No',180]]],
+ ['Mamaw','Mamaw brings up the dog',[['Yes',-400],['No',300]]],
+ ['Mamaw','Mamaw says she has to go home to the dog',[['Yes',-175],['No',145]]],
+ ['Bingo','Bingo squares hit by the end of the night',[['Over 15.5',-110],['Under 15.5',-110]]]
+];
+let S={players:{},props:{},bets:{}},mode='loading',db=null,canW=true,bookie=false,view='board',cat='All',slip=null,settling=null,armed=null,form=null;
+let me=null;try{me=localStorage.getItem(MEK)}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=n=>Math.round(n).toLocaleString('en-US');
+const od=o=>(o>0?'+':'')+o;
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const profit=(s,o)=>o>0?s*o/100:s*100/(-o);
+const toast=t=>{const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2200)};
+const note=t=>{const e=$('note');e.hidden=!t;e.textContent=t||''};
+function ret(b){const p=S.props[b.prop];if(!p||p.status!=='final')return null;if(p.win===-1)return b.stake;return p.win===b.side?b.stake+Math.round(profit(b.stake,b.odds)):0}
+function bank(pid){let bal=START,open=0;for(const b of Object.values(S.bets)){if(b.pid!==pid)continue;bal-=b.stake;const r=ret(b);if(r===null)open+=b.stake;else bal+=r}return{bal,open}}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+function fail(e){if(e&&e.code==='permission-denied')toast('The book is closed — ask the host');else toast('Didn’t save — try again')}
+async function put(col,id,obj){if(mode==='local'){S[col][id]=obj;saveLocal();render();return true}try{await db.collection(col).doc(id).set(obj);return true}catch(e){fail(e);return false}}
+async function del(col,id){if(mode==='local'){delete S[col][id];saveLocal();render();return true}try{await db.collection(col).doc(id).delete();return true}catch(e){fail(e);return false}}
+const sortedProps=()=>Object.entries(S.props).sort((a,b)=>{const r={open:0,locked:1,final:2};return(r[a[1].status]-r[b[1].status])||((a[1].t||0)-(b[1].t||0))});
+
+function renderTop(){const p=me&&S.players[me];$('meName').textContent=p?p.name:'Pick your name';$('meBank').textContent=p?num(bank(me).bal)+' TB':'—';$('addBtn').hidden=!(bookie&&canW);$('hostBtn').hidden=mode!=='remote';$('resetBtn').hidden=!(bookie&&canW);$('hostBtn').textContent=bookie?'Turn off host controls':'Host controls'}
+function renderBoard(){
+ const props=sortedProps(),cats=['All',...new Set(props.map(([,p])=>p.cat||'Misc'))];if(!cats.includes(cat))cat='All';
+ $('cats').innerHTML=cats.length>2?cats.map(c=>`<button data-act="cat" data-c="${esc(c)}" class="${c===cat?'on':''}">${esc(c)}</button>`).join(''):'';
+ if(!props.length){$('props').innerHTML=mode==='loading'?'':`<div class="empty"><p>No lines on the board yet.</p>${bookie&&canW?'<button class="btn" data-act="starter">Load the bingo props</button> <button class="btn ghost" data-act="newprop">Write my own</button>':'<p class="small">The host hasn’t posted any props.</p>'}</div>`;return}
+ $('props').innerHTML=props.filter(([,p])=>cat==='All'||(p.cat||'Misc')===cat).map(([id,p])=>{
+  const bets=Object.values(S.bets).filter(b=>b.prop===id),pot=bets.reduce((s,b)=>s+b.stake,0),open=p.status==='open';
+  const st=p.status==='final'?(p.win===-1?'Void · stakes back':'Final'):p.status==='locked'?'Locked':'Open';
+  const sides=p.sides.map((s,i)=>{const cls=p.status==='final'&&p.win!==-1?(p.win===i?'won':'lost'):(slip&&slip.prop===id&&slip.side===i?'sel':'');
+   return`<button class="odd ${cls}" data-act="odd" data-p="${esc(id)}" data-s="${i}" ${open&&canW?'':'disabled'}><span class="sl">${esc(s.l)}</span><b>${esc(od(s.o))}</b></button>`}).join('');
+  let bk='';if(bookie&&canW){
+   if(settling===id)bk=`<div class="bk"><span class="lbl">Who won?</span>${p.sides.map((s,i)=>`<button class="btn sm" data-act="settle" data-p="${esc(id)}" data-s="${i}">${esc(s.l)}</button>`).join('')}<button class="btn sm ghost" data-act="settle" data-p="${esc(id)}" data-s="-1">Void it</button><button class="btn sm ghost" data-act="unsettle">Cancel</button></div>`;
+   else bk=`<div class="bk">${p.status==='final'?`<button class="btn sm ghost" data-act="reopen" data-p="${esc(id)}">Reopen</button>`:`<button class="btn sm ghost" data-act="lock" data-p="${esc(id)}">${open?'Lock betting':'Unlock'}</button><button class="btn sm" data-act="settling" data-p="${esc(id)}">Settle</button>`}<button class="btn sm ghost" data-act="edit" data-p="${esc(id)}">Edit</button><button class="btn sm ${armed==='p'+id?'warn':'ghost'}" data-act="delprop" data-p="${esc(id)}">${armed==='p'+id?'Tap again to delete':'Delete'}</button></div>`}
+  return`<article class="prop ${p.status==='final'?'done':''}"><div class="ph"><span class="pill">${esc(p.cat||'Misc')}</span><span class="st-${esc(p.status)}">${esc(st)}</span></div><h3>${esc(p.title)}</h3><div class="sides">${sides}</div><div class="pm">${bets.length?`${bets.length} bet${bets.length>1?'s':''} · ${num(pot)} TB riding`:'No action yet'}</div>${bk}</article>`}).join('')||'<div class="empty"><p>Nothing in this category.</p></div>'}
+function betRow(id,b,showWho){const p=S.props[b.prop];if(!p)return'';const side=p.sides[b.side]||{l:'?'},r=ret(b),win=Math.round(profit(b.stake,b.odds));
+ const who=showWho?esc((S.players[b.pid]||{}).name||'Someone')+' · ':'';
+ let res=r===null?`<span>${num(b.stake)} to win ${num(win)}</span>`:p.win===-1?'<span>Void · refunded</span>':r>0?`<span class="pos">Won +${num(r-b.stake)}</span>`:`<span class="neg">Lost −${num(b.stake)}</span>`;
+ const cancel=!showWho&&p.status==='open'&&canW?`<br><button class="btn sm ghost" data-act="cancel" data-b="${esc(id)}">${armed==='b'+id?'Tap to confirm':'Cancel bet'}</button>`:'';
+ return`<div class="row"><div><div class="t">${esc(p.title)}</div><div class="m">${who}${esc(side.l)} ${esc(od(b.odds))}</div></div><div class="r">${res}${cancel}</div></div>`}
+function renderBets(){const p=me&&S.players[me];let h='';
+ if(!p)h=`<div class="empty"><p>Pick your name to see your bets.</p><button class="btn" data-act="pick">Pick your name</button></div>`;
+ else{const mine=Object.entries(S.bets).filter(([,b])=>b.pid===me).sort((a,b)=>b[1].t-a[1].t),k=bank(me);
+  h=`<h2>${esc(p.name)}’s slip</h2><p class="small">${num(k.bal)} TB available · ${num(k.open)} TB in play</p>`+(mine.length?mine.map(([id,b])=>betRow(id,b,false)).join(''):'<div class="empty"><p>No bets yet. Tap any odds on the board.</p></div>')}
+ const feed=Object.entries(S.bets).sort((a,b)=>b[1].t-a[1].t).slice(0,15);
+ if(feed.length)h+=`<h2 style="margin-top:24px">Latest action</h2>`+feed.map(([id,b])=>betRow(id,b,true)).join('');
+ $('mybets').innerHTML=h}
+function renderStand(){const ps=Object.entries(S.players).map(([id,p])=>{const k=bank(id);return{id,name:p.name,...k,tot:k.bal+k.open}}).sort((a,b)=>b.tot-a.tot);
+ if(!ps.length){$('stand').innerHTML='<div class="empty"><p>No bettors yet.</p><button class="btn" data-act="pick">Add a name</button></div>';return}
+ const mx=Math.max(...ps.map(p=>p.tot),1);
+ $('stand').innerHTML='<h2>Standings</h2><p class="small">Ranked by bankroll plus money still in play.</p>'+ps.map((p,i)=>{const pl=p.bal-START,settledPL=pl+p.open;
+  return`<div class="row"><span class="rank">${i+1}</span><div style="flex:1"><div class="t">${esc(p.name)}${p.id===me?' <span class="small">(you)</span>':''}</div><div class="meter"><i style="width:${Math.max(2,p.tot/mx*100).toFixed(1)}%"></i></div><div class="m">${num(p.open)} TB in play</div></div><div class="r">${num(p.bal)} TB<div class="m ${settledPL>0?'pos':settledPL<0?'neg':''}">${settledPL>0?'+':settledPL<0?'−':''}${num(Math.abs(settledPL))} settled</div></div></div>`}).join('')}
+function renderSlip(){const e=$('slip');if(!slip||!S.props[slip.prop]){e.hidden=true;return}
+ const p=S.props[slip.prop],s=p.sides[slip.side],k=me&&S.players[me]?bank(me):null,st=Math.max(0,Math.floor(+slip.stake||0)),w=Math.round(profit(st,s.o));
+ if(p.status!=='open'){slip=null;e.hidden=true;toast('That line just locked');return}
+ const key=slip.prop+'|'+slip.side+'|'+(k?me:'');
+ if(k&&!e.hidden&&e.dataset.k===key&&$('stk')){slipCalc();$('sw').textContent=`Betting as ${S.players[me].name} · ${num(k.bal)} TB available`;return}
+ e.dataset.k=key;e.hidden=false;const ok=k&&st>0&&st<=k.bal;
+ e.innerHTML=`<div class="wrap"><div class="sh-top"><div><span class="small">${esc(p.title)}</span><b>${esc(s.l)} ${esc(od(s.o))}</b></div><button class="x" data-act="close" aria-label="Close bet slip">×</button></div>
+ <div class="stake"><input id="stk" type="number" inputmode="numeric" min="1" placeholder="Stake" value="${st||''}" aria-label="Stake in Turkey Bucks">${[25,100,250].map(v=>`<button class="btn ghost sm" data-act="amt" data-v="${v}">${v}</button>`).join('')}<button class="btn ghost sm" data-act="amt" data-v="max">All in</button></div>
+ <div class="pays"><span>To win <b id="tw">${num(w)}</b></span><span>Pays <b id="py">${num(st+w)}</b></span></div>
+ <div class="small" id="sw">${k?`Betting as ${esc(S.players[me].name)} · ${num(k.bal)} TB available`:'Pick your name first'}</div>
+ <button class="btn place" data-act="place" id="plc" ${ok||!k?'':'disabled'}>${k?'Place bet':'Pick your name'}</button></div>`}
+function render(){renderTop();renderBoard();renderBets();renderStand();renderSlip()}
+function slipCalc(){if(!slip)return;const p=S.props[slip.prop],s=p.sides[slip.side],st=Math.max(0,Math.floor(+slip.stake||0)),w=Math.round(profit(st,s.o)),k=me&&S.players[me]?bank(me):null;
+ $('tw').textContent=num(w);$('py').textContent=num(st+w);$('plc').disabled=!!k&&!(st>0&&st<=k.bal)}
+
+function openModal(h){$('mbox').innerHTML=h;$('modal').hidden=false;const f=$('mbox').querySelector('input');if(f&&matchMedia('(min-width:620px)').matches)f.focus()}
+function closeModal(){$('modal').hidden=true;form=null}
+function pickModal(){const ps=Object.entries(S.players).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+ openModal(`<div class="sh-top"><b style="font:700 26px 'Barlow Condensed'">Who’s betting?</b><button class="x" data-act="mclose" aria-label="Close">×</button></div><p class="small">Anyone can bet for anyone — honor system, it’s Thanksgiving.</p>
+ <div class="plist">${ps.map(([id,p])=>{const n=Object.values(S.bets).some(b=>b.pid===id);return`<div style="display:flex;gap:6px"><button class="pl ${id===me?'on':''}" data-act="iam" data-id="${esc(id)}"><span>${esc(p.name)}</span><span>${num(bank(id).bal)} TB</span></button>${bookie&&canW&&!n?`<button class="x" style="margin-top:4px" data-act="delpl" data-id="${esc(id)}" aria-label="Remove ${esc(p.name)}">${armed==='u'+id?'!':'−'}</button>`:''}</div>`}).join('')||'<p class="small">No names yet — add the first one.</p>'}</div>
+ ${canW?'<form class="addp" id="addpl"><input class="in" id="pn" maxlength="30" placeholder="Add a name, e.g. Grandma" aria-label="New bettor name"><button class="btn">Add</button></form>':''}`)}
+function propModal(id){const p=id?S.props[id]:null;form={id,sides:p?p.sides.map(s=>({l:s.l,o:od(s.o)})):[{l:'Yes',o:'+150'},{l:'No',o:'-180'}]};
+ const cats=[...new Set(Object.values(S.props).map(p=>p.cat).filter(Boolean))];
+ openModal(`<div class="sh-top"><b style="font:700 26px 'Barlow Condensed'">${p?'Edit prop':'New prop'}</b><button class="x" data-act="mclose" aria-label="Close">×</button></div>
+ <form id="pf"><label for="pt">The bet</label><input class="in" id="pt" maxlength="120" required placeholder="Uncle Rick falls asleep during the game" value="${esc(p?p.title:'')}">
+ <label for="pc">Category</label><input class="in" id="pc" maxlength="24" list="catlist" placeholder="Dinner" value="${esc(p?p.cat:'')}"><datalist id="catlist">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+ <label>Sides and odds <span class="small">(American odds: +150 pays 150 on 100, −180 risks 180 to win 100)</span></label><div id="sides"></div>
+ <button type="button" class="btn ghost sm" data-act="addside">+ Add a side</button>
+ ${p&&Object.values(S.bets).some(b=>b.prop===id)?'<p class="small">Bets already placed keep the odds they got.</p>':''}
+ <p class="small" id="perr" style="color:var(--loss)"></p><button class="btn place">${p?'Save changes':'Post to the board'}</button></form>`);drawSides()}
+function drawSides(){$('sides').innerHTML=form.sides.map((s,i)=>`<div class="siderow"><input class="in" data-f="l" data-i="${i}" maxlength="30" value="${esc(s.l)}" aria-label="Side ${i+1} name" placeholder="Side"><input class="in" data-f="o" data-i="${i}" inputmode="numeric" value="${esc(s.o)}" aria-label="Side ${i+1} odds" placeholder="+120"><button type="button" class="x" data-act="rmside" data-i="${i}" ${form.sides.length<3?'disabled':''} aria-label="Remove side">−</button></div>`).join('')}
+
+async function savePlayer(name){name=name.trim().slice(0,30);if(!name)return;const ex=Object.entries(S.players).find(([,p])=>p.name.toLowerCase()===name.toLowerCase());
+ if(ex){setMe(ex[0]);return}const id=uid('u');if(await put('players',id,{name,t:Date.now()})){S.players[id]=S.players[id]||{name,t:Date.now()};setMe(id)}}
+function setMe(id){me=id;try{localStorage.setItem(MEK,id)}catch(e){}closeModal();render();if(slip)toast('Betting as '+S.players[id].name)}
+async function loadStarter(){const t=Date.now();for(let i=0;i<STARTER.length;i++){const[c,title,sd]=STARTER[i];await put('props',uid('p'),{cat:c,title,sides:sd.map(([l,o])=>({l,o})),status:'open',win:null,t:t+i})}toast('Bingo props posted')}
+async function setProp(id,patch){const p=S.props[id];if(!p)return;await put('props',id,{...p,...patch})}
+
+document.addEventListener('click',async ev=>{const el=ev.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,pid=el.dataset.p;
+ if(a!=='delprop'&&a!=='cancel'&&a!=='delpl'&&a!=='reset')armed=null;
+ switch(a){
+ case'pick':pickModal();break;
+ case'host':if(bookie){bookie=false;try{localStorage.removeItem(HK)}catch(e){}render();toast('Host controls off');break}
+  openModal(`<div class="sh-top"><b style="font:700 26px 'Barlow Condensed'">Host controls</b><button class="x" data-act="mclose" aria-label="Close">×</button></div><form id="hostf"><label for="hp">Host PIN</label><input class="in" id="hp" inputmode="numeric" autocomplete="off"><p class="small" id="herr" style="color:var(--loss)"></p><button class="btn place">Unlock</button></form>`);break;
+ case'mclose':closeModal();break;
+ case'iam':setMe(el.dataset.id);break;
+ case'delpl':if(armed!=='u'+el.dataset.id){armed='u'+el.dataset.id;pickModal();break}armed=null;await del('players',el.dataset.id);if(me===el.dataset.id)me=null;pickModal();break;
+ case'cat':cat=el.dataset.c;renderBoard();break;
+ case'odd':{const s=+el.dataset.s;slip=slip&&slip.prop===pid&&slip.side===s?null:{prop:pid,side:s,stake:slip?slip.stake:100};render();if(slip&&!(me&&S.players[me]))pickModal();break}
+ case'close':slip=null;render();break;
+ case'amt':if(!slip)break;slip.stake=el.dataset.v==='max'?(me&&S.players[me]?Math.max(0,bank(me).bal):0):+el.dataset.v;$('stk').value=slip.stake||'';slipCalc();break;
+ case'place':{if(!(me&&S.players[me])){pickModal();break}const p=S.props[slip.prop],st=Math.floor(+slip.stake||0),k=bank(me);
+  if(!p||p.status!=='open'){toast('That line is locked');break}if(st<1||st>k.bal){toast('Not enough Turkey Bucks');break}
+  el.disabled=true;const b={pid:me,prop:slip.prop,side:slip.side,odds:p.sides[slip.side].o,stake:st,t:Date.now()};
+  if(await put('bets',uid('b'),b)){toast(`Bet placed: ${p.sides[slip.side].l} ${od(b.odds)}`);slip=null;render()}else el.disabled=false;break}
+ case'cancel':{const id=el.dataset.b;if(armed!=='b'+id){armed='b'+id;renderBets();break}armed=null;await del('bets',id);toast('Bet cancelled');break}
+ case'reset':if(armed!=='reset'){armed='reset';el.textContent='Tap again: wipes all props and bets';el.classList.add('warn');break}armed=null;el.disabled=true;
+  for(const id of Object.keys(S.bets))await del('bets',id);for(const id of Object.keys(S.props))await del('props',id);await loadStarter();el.disabled=false;el.textContent='Reset board to bingo props';el.classList.remove('warn');break;
+ case'starter':el.disabled=true;await loadStarter();break;
+ case'newprop':propModal(null);break;
+ case'edit':propModal(pid);break;
+ case'lock':await setProp(pid,{status:S.props[pid].status==='open'?'locked':'open'});break;
+ case'settling':settling=pid;renderBoard();break;
+ case'unsettle':settling=null;renderBoard();break;
+ case'settle':settling=null;await setProp(pid,{status:'final',win:+el.dataset.s});toast(+el.dataset.s===-1?'Voided — stakes refunded':'Settled! Payouts are in');break;
+ case'reopen':await setProp(pid,{status:'locked',win:null});break;
+ case'delprop':if(armed!=='p'+pid){armed='p'+pid;renderBoard();break}armed=null;for(const[id,b]of Object.entries(S.bets))if(b.prop===pid)await del('bets',id);await del('props',pid);toast('Prop removed, bets refunded');break;
+ case'addside':if(form.sides.length<4){form.sides.push({l:'',o:''});drawSides()}break;
+ case'rmside':form.sides.splice(+el.dataset.i,1);drawSides();break;
+ }});
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{view=b.dataset.v;document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));for(const v of['board','bets','stand'])$('v-'+v).hidden=v!==view;scrollTo({top:0})}));
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='stk'&&slip){slip.stake=t.value;slipCalc()}if(t.dataset.f&&form)form.sides[+t.dataset.i][t.dataset.f]=t.value});
+document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target;
+ if(f.id==='addpl')await savePlayer($('pn').value);
+ if(f.id==='hostf'){if($('hp').value.trim()===HOST_PIN){bookie=true;try{localStorage.setItem(HK,'1')}catch(e){}closeModal();render();toast('Host controls on')}else $('herr').textContent='Wrong PIN';return}
+ if(f.id==='pf'){const title=$('pt').value.trim(),c=$('pc').value.trim()||'Misc',sides=[];
+  for(const s of form.sides){const l=s.l.trim(),o=parseInt(String(s.o).replace(/[^\d+-]/g,''),10);if(!l){$('perr').textContent='Every side needs a name.';return}if(!(Math.abs(o)>=100)){$('perr').textContent=`Odds for “${l}” should look like +150 or -180.`;return}sides.push({l,o})}
+  if(!title){$('perr').textContent='Describe the bet.';return}
+  const old=form.id?S.props[form.id]:null,id=form.id||uid('p');closeModal();
+  await put('props',id,old?{...old,title,cat:c,sides}:{title,cat:c,sides,status:'open',win:null,t:Date.now()});toast(old?'Prop updated':'Posted to the board')}});
+
+render();
+(async()=>{
+ const cfgOk=FIREBASE.apiKey&&FIREBASE.projectId;
+ if(cfgOk){try{for(const f of['app','firestore'])await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=`https://www.gstatic.com/firebasejs/10.12.2/firebase-${f}-compat.js`;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});
+  firebase.initializeApp(FIREBASE);db=firebase.firestore()}catch(e){db=null}}
+ if(!db){mode='local';try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d)for(const c of COLS)S[c]=d[c]||{}}catch(e){}bookie=true;canW=true;
+  note(cfgOk?'Couldn’t reach the shared book, so this is running on this device only.':'Running on this device only — pass the phone around the table.');render();return}
+ mode='remote';canW=true;try{bookie=localStorage.getItem(HK)==='1'}catch(e){}
+ note('');render();
+ const timer=setTimeout(()=>note('Can’t reach the book yet — check your connection.'),10000);let fresh=0;
+ for(const c of COLS)db.collection(c).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>o[d.id]=d.data());S[c]=o;
+   fresh|=1<<COLS.indexOf(c);if(fresh===7){clearTimeout(timer);if($('note').textContent.startsWith('Can’t'))note('')}
+   render()},e=>{clearTimeout(timer);note('Lost the connection to the book. Reload to try again.')});
+})();
+}
+</script>
+</body>
+</html>
