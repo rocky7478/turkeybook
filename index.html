@@ -131,7 +131,7 @@ label{display:block;font-size:14px;font-weight:600;color:var(--mut);margin:10px 
 <script>
 {
 // ===== SETUP: paste your Firebase web config here (Project settings > Your apps > Web app) =====
-const FIREBASE={apiKey:'',authDomain:'',projectId:'',appId:''};
+const FIREBASE={apiKey:'AIzaSyC9TRD6VP2ZvCiztrijcYW_XJjSSKGSf3I',authDomain:'turkeybook.firebaseapp.com',projectId:'turkeybook',storageBucket:'turkeybook.firebasestorage.app',messagingSenderId:'736303961970',appId:'1:736303961970:web:145757ec0f8b848fd36feb'};
 // PIN that unlocks host controls (add, lock, settle props). Change it before you share the link.
 const HOST_PIN='1126';
 // ==========================================================================================
@@ -182,7 +182,7 @@ async function put(col,id,obj){if(mode==='local'){S[col][id]=obj;saveLocal();ren
 async function del(col,id){if(mode==='local'){delete S[col][id];saveLocal();render();return true}try{await db.collection(col).doc(id).delete();return true}catch(e){fail(e);return false}}
 const sortedProps=()=>Object.entries(S.props).sort((a,b)=>{const r={open:0,locked:1,final:2};return(r[a[1].status]-r[b[1].status])||((a[1].t||0)-(b[1].t||0))});
 
-function renderTop(){const p=me&&S.players[me];$('meName').textContent=p?p.name:'Pick your name';$('meBank').textContent=p?num(bank(me).bal)+' TB':'—';$('addBtn').hidden=!(bookie&&canW);$('hostBtn').hidden=mode!=='remote';$('resetBtn').hidden=!(bookie&&canW);$('hostBtn').textContent=bookie?'Turn off host controls':'Host controls'}
+function renderTop(){const p=me&&S.players[me];$('meName').textContent=p?p.name:'Pick your name';$('meBank').textContent=p?num(bank(me).bal)+' TB':'—';$('addBtn').hidden=!(bookie&&canW);$('hostBtn').hidden=mode==='loading';$('resetBtn').hidden=!(bookie&&canW);$('hostBtn').textContent=bookie?'Turn off host controls':'Host controls'}
 function renderBoard(){
  const props=sortedProps(),cats=['All',...new Set(props.map(([,p])=>p.cat||'Misc'))];if(!cats.includes(cat))cat='All';
  $('cats').innerHTML=cats.length>2?cats.map(c=>`<button data-act="cat" data-c="${esc(c)}" class="${c===cat?'on':''}">${esc(c)}</button>`).join(''):'';
@@ -300,8 +300,8 @@ render();
  const cfgOk=FIREBASE.apiKey&&FIREBASE.projectId;
  if(cfgOk){try{for(const f of['app','firestore'])await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=`https://www.gstatic.com/firebasejs/10.12.2/firebase-${f}-compat.js`;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});
   firebase.initializeApp(FIREBASE);db=firebase.firestore()}catch(e){db=null}}
- if(!db){mode='local';try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d)for(const c of COLS)S[c]=d[c]||{}}catch(e){}bookie=true;canW=true;
-  note(cfgOk?'Couldn’t reach the shared book, so this is running on this device only.':'Running on this device only — pass the phone around the table.');render();return}
+ if(!db){mode='local';try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d)for(const c of COLS)S[c]=d[c]||{}}catch(e){}try{bookie=localStorage.getItem(HK)==='1'}catch(e){}canW=true;
+  note(cfgOk?'Couldn’t reach the shared book — bets on this phone won’t reach anyone else. Check your connection and reload.':'Not connected to a shared book yet (no Firebase config in the file), so bets only save on this phone.');render();return}
  mode='remote';canW=true;try{bookie=localStorage.getItem(HK)==='1'}catch(e){}
  note('');render();
  const timer=setTimeout(()=>note('Can’t reach the book yet — check your connection.'),10000);let fresh=0;
